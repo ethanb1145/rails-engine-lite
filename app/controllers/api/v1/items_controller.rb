@@ -1,5 +1,6 @@
 class Api::V1::ItemsController < ApplicationController
   rescue_from ActiveRecord::RecordNotFound, with: :record_not_found
+  rescue_from ActiveRecord::RecordInvalid, with: :merchant_not_found
 
   def index
     render json: ItemSerializer.new(Item.all)
@@ -29,6 +30,12 @@ class Api::V1::ItemsController < ApplicationController
     item.destroy
     head :no_content
   end
+
+  def merchant
+    item = Item.find(params[:id])
+    merchant = item.merchant
+    render json: ItemSerializer.new(merchant)
+  end
   
   private
 
@@ -38,5 +45,9 @@ class Api::V1::ItemsController < ApplicationController
 
   def record_not_found
     render json: { error: "Item not found" }, status: :not_found
+  end
+
+  def merchant_not_found
+    render json: { error: "Merchant not found" }, status: :not_found
   end
 end
