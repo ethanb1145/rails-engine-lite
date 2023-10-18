@@ -129,7 +129,7 @@ RSpec.describe "Items API" do
   end
 
   describe "update an item" do
-    it "should update an item" do
+    it "should update an item; happy path" do
       id = create(:item).id
       previous_name = Item.last.name
       item_params = { name: "Name" }
@@ -141,6 +141,21 @@ RSpec.describe "Items API" do
       expect(response).to be_successful
       expect(item.name).to_not eq(previous_name)
       expect(item.name).to eq("Name")
+    end
+  end
+
+  describe "get an item's merchant" do
+    it "should get one merchant by id; happy path" do
+      merchant = create(:merchant)
+      item = create(:item, merchant: merchant)
+      item_id = item.id
+
+      get "/api/v1/items/#{item_id}/merchant"
+
+      expect(response).to be_successful
+      
+      data_response = JSON.parse(response.body, symbolize_names: true)
+      merchant = data_response[:data]
     end
   end
 end
