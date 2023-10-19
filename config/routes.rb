@@ -5,13 +5,15 @@ Rails.application.routes.draw do
   # root "articles#index"
   namespace :api do 
     namespace :v1 do 
+      get "/items/:id/merchant", to: "items/merchants#show"
+      get "/merchants/find", to: "merchants/search#find"
+      get "/items/find_all", to: "items/search#find_all"
+
       resources :merchants, only: [:index, :show] do 
         resources :items, module: :merchants, only: [:index]
       end
 
       resources :items, only: [:index, :show, :create, :update, :destroy]
-
-      get "/items/:id/merchant", to: "items/merchants#show"
     end
   end
 end

@@ -158,4 +158,16 @@ RSpec.describe "Items API" do
       merchant = data_response[:data]
     end
   end
+
+  describe "item find all" do
+    it "should find all items by name" do
+      get "/api/v1/items/find_all?name=hArU"
+      #require 'pry';binding.pry
+      expect(response).to be_successful
+      
+      data_response = JSON.parse(response.body, symbolize_names: true)
+      items = data_response[:data]
+      #require 'pry';binding.pry
+    end
+  end
 end
