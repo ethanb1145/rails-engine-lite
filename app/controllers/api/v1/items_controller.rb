@@ -1,6 +1,5 @@
 class Api::V1::ItemsController < ApplicationController
-  rescue_from ActiveRecord::RecordNotFound, with: :record_not_found
-  rescue_from ActiveRecord::RecordInvalid, with: :merchant_not_found
+  rescue_from ActiveRecord::RecordNotFound, with: :not_found_response
 
   def index
     render json: ItemSerializer.new(Item.all)
@@ -18,10 +17,11 @@ class Api::V1::ItemsController < ApplicationController
   end
 
   def update
-    item = Item.update!(params[:id], item_params)
-
+    item = Item.update(params[:id], item_params)
     if item.save
       render json: ItemSerializer.new(item)
+    else
+      render json: { error: "Invalid Merchant ID." }, status: 400
     end
   end
 
@@ -43,11 +43,8 @@ class Api::V1::ItemsController < ApplicationController
     params.require(:item).permit(:name, :description, :unit_price, :merchant_id)
   end
 
-  def record_not_found
-    render json: { error: "Item not found" }, status: :not_found
-  end
-
-  def merchant_not_found
-    render json: { error: "Merchant not found" }, status: :not_found
+  def not_found_response(error)
+    render json: ErrorSerializer.new(ErrorMessage.new(error.message, 404))
+      .serialize_json, status: 404
   end
 end
