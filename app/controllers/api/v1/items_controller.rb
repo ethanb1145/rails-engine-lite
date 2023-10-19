@@ -20,6 +20,8 @@ class Api::V1::ItemsController < ApplicationController
     item = Item.update(params[:id], item_params)
     if item.save
       render json: ItemSerializer.new(item)
+    else
+      render json: { error: "Invalid Merchant ID." }, status: 400
     end
   end
 
