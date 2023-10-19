@@ -1,15 +1,12 @@
 class Api::V1::ItemsController < ApplicationController
+  rescue_from ActiveRecord::RecordNotFound, with: :not_found_response
+
   def index
     render json: ItemSerializer.new(Item.all)
   end
 
   def show 
-    begin
-      render json: ItemSerializer.new(Item.find(params[:id]))
-    rescue ActiveRecord::RecordNotFound => e
-      render json: ErrorSerializer.new(ErrorMessage.new(e.message, 404))
-      .serialize_json, status: 404
-    end
+    render json: ItemSerializer.new(Item.find(params[:id]))
   end
 
   def create
@@ -20,42 +17,32 @@ class Api::V1::ItemsController < ApplicationController
   end
 
   def update
-    begin
-      item = Item.update(params[:id], item_params)
-      if item.save
-        render json: ItemSerializer.new(item)
-      end
-    rescue ActiveRecord::RecordNotFound => e
-      render json: ErrorSerializer.new(ErrorMessage.new(e.message, 404))
-      .serialize_json, status: 404
+    item = Item.update(params[:id], item_params)
+    if item.save
+      render json: ItemSerializer.new(item)
     end
   end
 
   def destroy
-    begin
-      item = Item.find(params[:id])
-      item.destroy
-      head :no_content
-    rescue ActiveRecord::RecordNotFound => e
-      render json: ErrorSerializer.new(ErrorMessage.new(e.message, 404))
-      .serialize_json, status: 404
-    end
+    item = Item.find(params[:id])
+    item.destroy
+    head :no_content
   end
 
   def merchant
-    begin
-      item = Item.find(params[:id])
-      merchant = item.merchant
-      render json: ItemSerializer.new(merchant)
-    rescue ActiveRecord::RecordNotFound => e
-      render json: ErrorSerializer.new(ErrorMessage.new(e.message, 404))
-      .serialize_json, status: 404
-    end
+    item = Item.find(params[:id])
+    merchant = item.merchant
+    render json: ItemSerializer.new(merchant)
   end
   
   private
 
   def item_params
     params.require(:item).permit(:name, :description, :unit_price, :merchant_id)
+  end
+
+  def not_found_response(error)
+    render json: ErrorSerializer.new(ErrorMessage.new(error.message, 404))
+      .serialize_json, status: 404
   end
 end
