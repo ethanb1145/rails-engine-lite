@@ -1,15 +1,15 @@
 class Api::V1::Items::SearchController < ApplicationController
   def find_all
-    if params.key?(:name) && !params.key?(:max_price) && !params.key?(:min_price)
-      items = Item.where("LOWER(name) LIKE ?", "%#{params[:name].downcase}%").order(:name)
+    if params[:name]
+      items = Item.search_by_name(params[:name])
       render json: ItemSerializer.new(items)
 
-    elsif params.key?(:max_price) && !params.key?(:min_price) && !params.key?(:name)
-      items = Item.where("unit_price <= ?", params[:max_price]).order(:unit_price)
+    elsif params[:max_price]
+      items = Item.search_by_max_price(params[:max_price])
       render json: ItemSerializer.new(items)
 
-    elsif params.key?(:min_price) && !params.key?(:max_price) && !params.key?(:name)
-      items = Item.where("unit_price >= ?", params[:min_price]).order(:unit_price)
+    elsif params[:min_price]
+      items = Item.search_by_min_price(params[:min_price])
       render json: ItemSerializer.new(items)
 
     else
